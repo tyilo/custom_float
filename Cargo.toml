@@ -35,7 +35,7 @@ bytemuck = ["dep:bytemuck"]
 use_std_float = []
 
 [dependencies]
-moddef = "0.2.6"
+moddef = "0.3.0"
 num-traits = "0.2.19"
 bytemuck = {version = "1.23.0", features = ["derive"], optional = true}
 serde = {version = "*", optional = true}
