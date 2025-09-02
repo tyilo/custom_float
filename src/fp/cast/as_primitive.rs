@@ -1,6 +1,6 @@
 use num_traits::AsPrimitive;
 
-use crate::{FpRepr, Fp, UInt};
+use crate::{FpRepr, Fp, fp::Fps, UInt};
 
 macro_rules! impl_as_primitive_uint {
     ($($i:ty),*) => {
@@ -12,7 +12,17 @@ macro_rules! impl_as_primitive_uint {
                 #[inline]
                 fn as_(self) -> $i
                 {
-                    self.to_uint_wrapping()
+                    self.to_int_wrapping()
+                }
+            }
+            impl<U, const SIGN_BIT: bool, const EXP_SIZE: usize, const INT_SIZE: usize, const FRAC_SIZE: usize, const EXP_BASE: usize> AsPrimitive<$i> for Fps<U, SIGN_BIT, EXP_SIZE, INT_SIZE, FRAC_SIZE, EXP_BASE>
+            where
+                U: FpRepr<SIGN_BIT, EXP_SIZE, INT_SIZE, FRAC_SIZE, EXP_BASE> + 'static
+            {
+                #[inline]
+                fn as_(self) -> $i
+                {
+                    self.to_int_wrapping()
                 }
             }
         )*
@@ -25,6 +35,16 @@ macro_rules! impl_as_primitive_int {
     ($($i:ty),*) => {
         $(
             impl<U, const SIGN_BIT: bool, const EXP_SIZE: usize, const INT_SIZE: usize, const FRAC_SIZE: usize, const EXP_BASE: usize> AsPrimitive<$i> for Fp<U, SIGN_BIT, EXP_SIZE, INT_SIZE, FRAC_SIZE, EXP_BASE>
+            where
+                U: FpRepr<SIGN_BIT, EXP_SIZE, INT_SIZE, FRAC_SIZE, EXP_BASE> + 'static
+            {
+                #[inline]
+                fn as_(self) -> $i
+                {
+                    self.to_int_wrapping()
+                }
+            }
+            impl<U, const SIGN_BIT: bool, const EXP_SIZE: usize, const INT_SIZE: usize, const FRAC_SIZE: usize, const EXP_BASE: usize> AsPrimitive<$i> for Fps<U, SIGN_BIT, EXP_SIZE, INT_SIZE, FRAC_SIZE, EXP_BASE>
             where
                 U: FpRepr<SIGN_BIT, EXP_SIZE, INT_SIZE, FRAC_SIZE, EXP_BASE> + 'static
             {
@@ -53,11 +73,31 @@ macro_rules! impl_as_primitive_float {
                     Into::<$f>::into(self)
                 }
             }
+            impl<U, const SIGN_BIT: bool, const EXP_SIZE: usize, const INT_SIZE: usize, const FRAC_SIZE: usize, const EXP_BASE: usize> AsPrimitive<$f> for Fps<U, SIGN_BIT, EXP_SIZE, INT_SIZE, FRAC_SIZE, EXP_BASE>
+            where
+                U: FpRepr<SIGN_BIT, EXP_SIZE, INT_SIZE, FRAC_SIZE, EXP_BASE> + 'static
+            {
+                #[inline]
+                fn as_(self) -> $f
+                {
+                    Into::<$f>::into(self)
+                }
+            }
         )*
     };
 }
 impl_as_primitive_float!(f16, f32, f64, f128);
 
+impl<T: UInt, U: UInt, const S: bool, const SIGN_BIT: bool, const E: usize, const EXP_SIZE: usize, const I: usize, const INT_SIZE: usize, const F: usize, const FRAC_SIZE: usize, const B: usize, const EXP_BASE: usize> AsPrimitive<Fp<T, S, E, I, F, B>> for Fps<U, SIGN_BIT, EXP_SIZE, INT_SIZE, FRAC_SIZE, EXP_BASE>
+where
+    T: FpRepr<S, E, I, F, B> + 'static,
+    U: FpRepr<SIGN_BIT, EXP_SIZE, INT_SIZE, FRAC_SIZE, EXP_BASE> + 'static
+{
+    fn as_(self) -> Fp<T, S, E, I, F, B>
+    {
+        Fp::from_fps(self)
+    }
+}
 impl<T: UInt, U: UInt, const S: bool, const SIGN_BIT: bool, const E: usize, const EXP_SIZE: usize, const I: usize, const INT_SIZE: usize, const F: usize, const FRAC_SIZE: usize, const B: usize, const EXP_BASE: usize> AsPrimitive<Fp<T, S, E, I, F, B>> for Fp<U, SIGN_BIT, EXP_SIZE, INT_SIZE, FRAC_SIZE, EXP_BASE>
 where
     T: FpRepr<S, E, I, F, B> + 'static,
@@ -66,5 +106,25 @@ where
     fn as_(self) -> Fp<T, S, E, I, F, B>
     {
         Fp::from_fp(self)
+    }
+}
+impl<T: UInt, U: UInt, const S: bool, const SIGN_BIT: bool, const E: usize, const EXP_SIZE: usize, const I: usize, const INT_SIZE: usize, const F: usize, const FRAC_SIZE: usize, const B: usize, const EXP_BASE: usize> AsPrimitive<Fps<T, S, E, I, F, B>> for Fps<U, SIGN_BIT, EXP_SIZE, INT_SIZE, FRAC_SIZE, EXP_BASE>
+where
+    T: FpRepr<S, E, I, F, B> + 'static,
+    U: FpRepr<SIGN_BIT, EXP_SIZE, INT_SIZE, FRAC_SIZE, EXP_BASE> + 'static
+{
+    fn as_(self) -> Fps<T, S, E, I, F, B>
+    {
+        Fps::from_fps(self)
+    }
+}
+impl<T: UInt, U: UInt, const S: bool, const SIGN_BIT: bool, const E: usize, const EXP_SIZE: usize, const I: usize, const INT_SIZE: usize, const F: usize, const FRAC_SIZE: usize, const B: usize, const EXP_BASE: usize> AsPrimitive<Fps<T, S, E, I, F, B>> for Fp<U, SIGN_BIT, EXP_SIZE, INT_SIZE, FRAC_SIZE, EXP_BASE>
+where
+    T: FpRepr<S, E, I, F, B> + 'static,
+    U: FpRepr<SIGN_BIT, EXP_SIZE, INT_SIZE, FRAC_SIZE, EXP_BASE> + 'static
+{
+    fn as_(self) -> Fps<T, S, E, I, F, B>
+    {
+        Fps::from_fp(self)
     }
 }

@@ -1,5 +1,6 @@
 moddef::moddef!(
-    mod {
+    flat(pub) mod {
+        bits,
         from_bytes,
         to_bytes
     }

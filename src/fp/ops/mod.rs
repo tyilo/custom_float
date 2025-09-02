@@ -1,16 +1,15 @@
 moddef::moddef!(
-    mod {
+    flat(pub) mod {
+        arithmetic,
         bytes,
-
-        add,
-        div,
-        euclid,
-        inv,
-        mul_add,
-        mul,
-        neg,
+        rational
+    },
+    flat(pub) mod {
+        clamp,
+        midpoint,
+        next,
+        polynomial,
         pow,
-        rem,
-        sub
+        round
     }
 );

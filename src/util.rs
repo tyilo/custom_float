@@ -1,8 +1,8 @@
 #![allow(unused)]
 
-use core::{alloc::Layout, ops::{Add, AddAssign, Div, MulAssign, Neg, Rem, Shl, Shr}};
+use core::{alloc::Layout, ops::{Add, AddAssign, Div, MulAssign, Neg, Rem, Shl, Shr, SubAssign}};
 
-use num_traits::{CheckedShl, CheckedAdd, CheckedSub, Float, NumCast, One, Zero};
+use num_traits::{Signed, CheckedAdd, CheckedShl, CheckedSub, Float, Inv, NumCast, One, Zero};
 
 use crate::{ieee754::{FpDouble, FpHalf, FpQuadruple, FpSingle}, util::const_array::ConstArray, AnyInt, Fp, FpRepr, Int, UInt};
 
@@ -339,63 +339,25 @@ pub const fn bitsize_of<T>() -> usize
     core::mem::size_of::<T>()*8
 }
 
-pub fn complementary_add_sub_assign<T>(y_add: &mut T, y_sub: &mut T, mut x: T) -> Result<(), ()>
+pub fn complementary_add_sub_assign<T>(y_add: Option<&mut T>, y_sub: Option<&mut T>, mut x: T) -> Result<(), ()>
 where
     T: CheckedSub + CheckedAdd + Copy
 {
-    if let Some(diff) = y_sub.checked_sub(&x)
+    if let Some(yy) = y_sub
     {
-        *y_sub = diff;
-        return Ok(())
+        if let Some(diff) = yy.checked_sub(&x)
+        {
+            *yy = diff;
+            return Ok(())
+        }
+        x = x - *yy;
     }
-    x = x - *y_sub;
-    if let Some(sum) = y_add.checked_add(&x)
+    if let Some(yy) = y_add && let Some(sum) = yy.checked_add(&x)
     {
-        *y_add = sum;
+        *yy = sum;
         return Ok(())
     }
     Err(())
-}
-
-#[inline]
-pub fn polynomial<T, F, const N: usize>(p: &[T; N], mut z: F, may_be_neg: bool, z_neg: bool) -> F
-where
-    T: Float,
-    F: Float + From<T> + AddAssign + MulAssign
-{
-    if z_neg && may_be_neg
-    {
-        z = -z;
-    }
-    let mut y = F::zero();
-    let mut zn = F::one();
-    for (n, p) in p.iter()
-        .enumerate()
-    {
-        if may_be_neg
-        {
-            y += <F as From<_>>::from(*p)*zn;
-        }
-        else if p.is_sign_positive() ^ (z_neg && (n % 2 != 0))
-        {
-            y += <F as From<_>>::from(p.abs())*zn;
-        }
-        zn *= z;
-    }
-    if !may_be_neg
-    {
-        let mut zn = F::one();
-        for (n, p) in p.iter()
-            .enumerate()
-        {
-            if p.is_sign_negative() ^ (z_neg && (n % 2 != 0))
-            {
-                y = y - <F as From<_>>::from(p.abs())*zn;
-            }
-            zn *= z;
-        }
-    }
-    y
 }
 
 pub fn chebychev_approximation<T, const N: usize>(coeffs: [T; N]) -> [T; N]
@@ -685,14 +647,16 @@ where
 
 pub fn powi<P, I: Int>(x: P, mut n: I) -> P
 where
-    P: One + Div<P, Output = P> + Copy
+    P: One + Div<P, Output = P> + Copy + Inv<Output = P> + Signed + PartialOrd
 {
     let mut r = P::one();
+    let s = n < I::zero();
+    let ss = s && x.abs() > r;
+    n = n.abs();
     
-    let mut x = if n < I::zero()
+    let mut x = if s && ss
     {
-        n = -n;
-        P::one() / x
+        x.inv()
     }
     else
     {
@@ -716,6 +680,11 @@ where
         {
             r = r*x;
         }
+    }
+
+    if s && !ss
+    {
+        r = r.inv()
     }
 
     r
@@ -835,6 +804,59 @@ pub const fn base_factor_paddings<const N: usize>(factor_sets: &[[usize; N]]) ->
         i += 1;
     }
     padding_sets.leak()
+}
+
+pub fn abs<T: AnyInt>(x: T) -> T
+{
+    trait AbsSpec: AnyInt
+    {
+        fn abs_(self) -> Self;
+    }
+    impl<I: AnyInt> AbsSpec for I
+    {
+        default fn abs_(self) -> Self
+        {
+            if self < I::zero()
+            {
+                return neg(self)
+            }
+            self
+        }
+    }
+    impl<I: AnyInt + Signed> AbsSpec for I
+    {
+        fn abs_(self) -> Self
+        {
+            self.abs()
+        }
+    }
+
+    x.abs_()
+}
+
+
+pub fn neg<T: AnyInt>(x: T) -> T
+{
+    trait NegSpec: AnyInt
+    {
+        fn neg_(self) -> Self;
+    }
+    impl<I: AnyInt> NegSpec for I
+    {
+        default fn neg_(self) -> Self
+        {
+            I::zero() - self
+        }
+    }
+    impl<I: AnyInt + Neg<Output = I>> NegSpec for I
+    {
+        fn neg_(self) -> Self
+        {
+            -self
+        }
+    }
+
+    x.neg_()
 }
 
 #[cfg(test)]

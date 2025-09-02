@@ -24,11 +24,11 @@ pub fn plot_curves<const N: usize, const M: usize>(
     mut y: [[T; N]; M]
 ) -> Result<(), Box<dyn std::error::Error>>
 {
-    let x_min = x.into_iter().flatten().filter(|x| x.is_finite()).reduce(T::min).unwrap();
-    let x_max = x.into_iter().flatten().filter(|x| x.is_finite()).reduce(T::max).unwrap();
+    let x_min = x.into_iter().flatten().filter(|x| x.is_finite()).reduce(T::min).unwrap_or_default();
+    let x_max = x.into_iter().flatten().filter(|x| x.is_finite()).reduce(T::max).unwrap_or_default();
     
-    let y_min = y.into_iter().flatten().filter(|x| x.is_finite()).reduce(T::min).unwrap();
-    let y_max = y.into_iter().flatten().filter(|x| x.is_finite()).reduce(T::max).unwrap();
+    let y_min = y.into_iter().flatten().filter(|x| x.is_finite()).reduce(T::min).unwrap_or_default();
+    let y_max = y.into_iter().flatten().filter(|x| x.is_finite()).reduce(T::max).unwrap_or_default();
     
     for y in y.iter_mut()
         .flatten()
@@ -86,16 +86,16 @@ pub fn plot_curve_2d<const NX: usize, const NY: usize>(
 
     let area = SVGBackend::new(plot_path, PLOT_RES).into_drawing_area();
     
-    let x_min = x.into_iter().reduce(T::min).unwrap();
-    let x_max = x.into_iter().reduce(T::max).unwrap();
+    let x_min = x.into_iter().reduce(T::min).unwrap_or_default();
+    let x_max = x.into_iter().reduce(T::max).unwrap_or_default();
     
-    let y_min = y.into_iter().reduce(T::min).unwrap();
-    let y_max = y.into_iter().reduce(T::max).unwrap();
+    let y_min = y.into_iter().reduce(T::min).unwrap_or_default();
+    let y_max = y.into_iter().reduce(T::max).unwrap_or_default();
 
     let f_ref = &f;
     let f_values: Vec<T> = y.into_iter().flat_map(|y| x.into_iter().map(move |x| f_ref(x, y))).collect();
 
-    let (z_min, z_max) = f_values.into_iter().map(|f| (f, f)).reduce(|a, b| (a.0.min(b.0), a.1.max(b.1))).unwrap();
+    let (z_min, z_max) = f_values.into_iter().map(|f| (f, f)).reduce(|a, b| (a.0.min(b.0), a.1.max(b.1))).unwrap_or_default();
 
     area.fill(&WHITE)?;
 
@@ -153,13 +153,13 @@ pub fn plot_parametric_curve_2d<const NU: usize, const NV: usize>(
                 .zip(b.0)
                 .map(|(a, b)| a.min(b))
                 .next_chunk()
-                .unwrap(),
+                .unwrap_or_default(),
             a.1.into_iter()
                 .zip(b.1)
                 .map(|(a, b)| a.max(b))
                 .next_chunk()
-                .unwrap()
-        )).unwrap();
+                .unwrap_or_default()
+        )).unwrap_or_default();
 
     area.fill(&WHITE)?;
 
@@ -232,14 +232,14 @@ where
 
     let area = SVGBackend::new(plot_path, PLOT_RES).into_drawing_area();
 
-    let r_max = r.into_iter().map(|r| r.abs()).reduce(T::max).unwrap();
+    let r_max = r.into_iter().map(|r| r.abs()).reduce(T::max).unwrap_or_default();
     
-    let theta_min = theta.into_iter().map(|theta| theta.abs()).reduce(T::min).unwrap();
-    let theta_max = theta.into_iter().map(|theta| theta.abs()).reduce(T::max).unwrap();
+    let theta_min = theta.into_iter().map(|theta| theta.abs()).reduce(T::min).unwrap_or_default();
+    let theta_max = theta.into_iter().map(|theta| theta.abs()).reduce(T::max).unwrap_or_default();
 
     let f_ref = &f;
     let f_values: Vec<T> = r.into_iter().flat_map(|r| theta.into_iter().map(move |theta| f_ref(r, theta))).collect();
-    let (z_min, z_max) = f_values.into_iter().map(|f| (f, f)).reduce(|a, b| (a.0.min(b.0), a.1.max(b.1))).unwrap();
+    let (z_min, z_max) = f_values.into_iter().map(|f| (f, f)).reduce(|a, b| (a.0.min(b.0), a.1.max(b.1))).unwrap_or_default();
 
     area.fill(&WHITE)?;
 
@@ -307,14 +307,14 @@ pub fn plot_parametric_curve_2d_rad<const NU: usize, const NV: usize>(
                 .zip(b.0)
                 .map(|(a, b)| a.min(b))
                 .next_chunk()
-                .unwrap(),
+                .unwrap_or_default(),
             a.1.into_iter()
                 .zip(b.1)
                 .map(|(a, b)| a.max(b))
                 .next_chunk()
-                .unwrap()
+                .unwrap_or_default()
         ))
-        .unwrap();
+        .unwrap_or_default();
 
     area.fill(&WHITE)?;
 

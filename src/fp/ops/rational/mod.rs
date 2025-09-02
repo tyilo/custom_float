@@ -1,0 +1,19 @@
+moddef::moddef!(
+    flat(pub) mod {
+        cbrt,
+        cos,
+        exp,
+        exp2,
+        exp10,
+        expb,
+        hypot,
+        ln,
+        log,
+        log2,
+        log10,
+        logb,
+        sin,
+        sqrt,
+        tan
+    }
+);

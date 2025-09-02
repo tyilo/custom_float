@@ -45,37 +45,37 @@ where
     #[inline]
     fn from_usize(n: usize) -> Option<Self>
     {
-        Some(Self::from_uint(n))
+        Some(Self::from_int(n))
     }
 
     #[inline]
     fn from_u8(n: u8) -> Option<Self>
     {
-        Some(Self::from_uint(n))
+        Some(Self::from_int(n))
     }
 
     #[inline]
     fn from_u16(n: u16) -> Option<Self>
     {
-        Some(Self::from_uint(n))
+        Some(Self::from_int(n))
     }
 
     #[inline]
     fn from_u32(n: u32) -> Option<Self>
     {
-        Some(Self::from_uint(n))
+        Some(Self::from_int(n))
     }
 
     #[inline]
     fn from_u64(n: u64) -> Option<Self>
     {
-        Some(Self::from_uint(n))
+        Some(Self::from_int(n))
     }
 
     #[inline]
     fn from_u128(n: u128) -> Option<Self>
     {
-        Some(Self::from_uint(n))
+        Some(Self::from_int(n))
     }
 
     #[inline]

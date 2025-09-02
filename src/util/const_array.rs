@@ -95,7 +95,7 @@ impl<T> ConstArray<T>
             return &[]
         }
         unsafe {
-            core::slice::from_raw_parts(ptr, len)
+            core::slice::from_raw_parts(core::intrinsics::const_make_global(ptr.cast()).cast(), len)
         }
     }
 }

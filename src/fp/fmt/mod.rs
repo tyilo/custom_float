@@ -9,7 +9,8 @@ moddef::moddef!(
 
 macro_rules! suited {
     ($t:ty) => {
-        <$t as From<Self>>::from(Self::min_value()) != 0.0
+        //<$t as From<Self>>::from(Self::from_bits(U::one())) != 0.0
+        crate::util::is_float_conversion_lossless::<Self, $t>()
     };
 }
 macro_rules! do_fmt {
@@ -60,3 +61,5 @@ use fmt_as as fmt_as;
 use do_fmt as do_fmt;
 use do_maybe_fmt as do_maybe_fmt;
 use suited as suited;
+
+// TODO: Implement this properly
