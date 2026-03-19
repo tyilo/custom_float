@@ -836,12 +836,3 @@ pub const fn base_factor_paddings<const N: usize>(factor_sets: &[[usize; N]]) ->
     }
     padding_sets.leak()
 }
-
-#[cfg(test)]
-#[test]
-fn test_factorize()
-{
-    const Y: &[[usize; 3]] = factorize(24);
-
-    println!("{Y:?}");
-}

@@ -1,28 +1,20 @@
 #![cfg_attr(not(test), no_std)]
-#![feature(test)]
+#![cfg_attr(test, feature(test))]
 #![allow(incomplete_features)]
 #![allow(internal_features)]
-#![feature(const_trait_impl)]
 #![feature(generic_const_exprs)]
 #![feature(trait_alias)]
 #![feature(iter_next_chunk)]
-#![feature(portable_simd)]
-#![feature(float_gamma)]
-#![feature(let_chains)]
+#![cfg_attr(test, feature(float_gamma))]
 #![feature(specialization)]
 #![feature(f16)]
 #![feature(f128)]
-#![feature(generic_arg_infer)]
-#![feature(assert_matches)]
-#![feature(decl_macro)]
-#![feature(more_float_constants)]
-#![feature(duration_millis_float)]
+#![cfg_attr(test, feature(more_float_constants))]
 #![feature(const_heap)]
 #![feature(core_intrinsics)]
-#![feature(alloc_layout_extra)]
 #![feature(layout_for_ptr)]
 #![feature(const_eval_select)]
-#![feature(bigint_helper_methods)]
+#![feature(widening_mul)]
 #![allow(clippy::excessive_precision)]
 
 //! # Custom Float
@@ -122,7 +114,7 @@ mod asm
 
     type F = FpDouble;
 
-    #[no_mangle]
+    #[unsafe(no_mangle)]
     fn asm_mul() -> F
     {
         let a = F::from(1.5);
@@ -142,7 +134,7 @@ mod tests
         ops::{Range, RangeBounds}, process::Termination, time::{Instant, SystemTime}
     };
 
-    use linspace::LinspaceArray;
+    use linspace::Linspace;
     use num::{Complex, NumCast};
     use num_traits::{Float, Inv, One, ToPrimitive, Zero};
     use test::Bencher;
@@ -237,8 +229,8 @@ mod tests
             F::from(1.253464).unwrap(),
             F::from(PI).unwrap(),
             F::from(TAU).unwrap(),
-            F::from(PHI).unwrap(),
-            F::from(EGAMMA).unwrap(),
+            F::from(GOLDEN_RATIO).unwrap(),
+            F::from(EULER_GAMMA).unwrap(),
             F::from(FRAC_PI_2).unwrap(),
             F::from(FRAC_PI_3).unwrap(),
             F::from(FRAC_PI_4).unwrap(),
@@ -496,7 +488,7 @@ mod tests
     #[allow(unused)]
     pub fn plot_err<R>(fn_name: &str, range: R, func: impl Fn(f32) -> f32, approx: impl Fn(f32) -> f32)
     where
-        R: RangeBounds<f32> + LinspaceArray<f32, N>
+        R: RangeBounds<f32> + Linspace<f32>
     {
         let x: [f32; N] = range.linspace_array();
         let y_approx = x.map(approx);
@@ -523,7 +515,7 @@ mod tests
     #[allow(unused)]
     pub fn plot_approx<R>(fn_name: &str, range: R, func: impl Fn(f32) -> f32, approx: impl Fn(f32) -> f32)
     where
-        R: RangeBounds<f32> + LinspaceArray<f32, N>
+        R: RangeBounds<f32> + Linspace<f32>
     {
         let x: [f32; N] = range.linspace_array();
         let y_approx = x.map(approx);
@@ -548,7 +540,7 @@ mod tests
     #[allow(unused)]
     pub fn plot_bench<R>(fn_name: &str, range: R, func: impl Fn(f32) -> f32, approx: impl Fn(f32) -> f32)
     where
-        R: RangeBounds<f32> + LinspaceArray<f32, N>
+        R: RangeBounds<f32> + Linspace<f32>
     {
         let x: [f32; N] = range.linspace_array();
         let y_approx = x.map(approx);
