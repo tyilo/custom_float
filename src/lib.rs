@@ -101,6 +101,8 @@ moddef::moddef!(
     }
 );
 
+pub use util::bitsize_of;
+
 #[cfg(test)]
 extern crate test;
 
