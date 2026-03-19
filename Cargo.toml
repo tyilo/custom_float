@@ -16,7 +16,7 @@ default = []#["use_std_float"]
 use_std_float = []
 
 [dependencies]
-moddef = "0.2.6"
+moddef = "0.3.0"
 num-traits = "0.2.19"
 
 [dev-dependencies]
